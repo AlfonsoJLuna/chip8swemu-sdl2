@@ -1,6 +1,8 @@
 build/*
 !build/.gitkeep
 
+libraries/SDL*
+
 objects/*
 !objects/.gitkeep
 
