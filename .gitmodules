@@ -1,0 +1,3 @@
+[submodule "libraries/chip8swemu"]
+	path = libraries/chip8swemu
+	url = https://github.com/AlfonsoJLuna/chip8swemu
