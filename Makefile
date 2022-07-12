@@ -30,25 +30,25 @@ ifeq ($(OS),Windows_NT)
 
 	ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
 
-		HEADERS += -Ilibraries/SDL2-2.0.12/x86_64-w64-mingw32/include/SDL2
+		HEADERS += -Ilibraries/SDL2-2.0.22/x86_64-w64-mingw32/include/SDL2
 		CFLAGS += -m64
-		LFLAGS += -m64 -Llibraries/SDL2-2.0.12/x86_64-w64-mingw32/lib
+		LFLAGS += -m64 -Llibraries/SDL2-2.0.22/x86_64-w64-mingw32/lib
 
 	else
 
 		ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
 
-			HEADERS += -Ilibraries/SDL2-2.0.12/x86_64-w64-mingw32/include/SDL2
+			HEADERS += -Ilibraries/SDL2-2.0.22/x86_64-w64-mingw32/include/SDL2
 			CFLAGS += -m64
-			LFLAGS += -m64 -Llibraries/SDL2-2.0.12/x86_64-w64-mingw32/lib
+			LFLAGS += -m64 -Llibraries/SDL2-2.0.22/x86_64-w64-mingw32/lib
 
 		endif
 
 		ifeq ($(PROCESSOR_ARCHITECTURE),x86)
 
-			HEADERS += -Ilibraries/SDL2-2.0.12/i686-w64-mingw32/include/SDL2
+			HEADERS += -Ilibraries/SDL2-2.0.22/i686-w64-mingw32/include/SDL2
 			CFLAGS += -m32
-			LFLAGS += -m32 -Llibraries/SDL2-2.0.12/i686-w64-mingw32/lib
+			LFLAGS += -m32 -Llibraries/SDL2-2.0.22/i686-w64-mingw32/lib
 
 		endif
 
