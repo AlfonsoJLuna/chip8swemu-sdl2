@@ -1,171 +1,161 @@
 #include "config.h"
 
-#include "chip8.h"
 #include <inttypes.h>
 #include <stdio.h>
 
 
-static config_t config;
+static config_t Config;
 
 
-static config_t sanitizeValues(config_t new_config)
+static uint16_t Constrain(uint16_t Value, uint16_t Min, uint16_t Max)
 {
-    if (new_config.frequency < 60)
+    if (Value < Min)
     {
-        new_config.frequency = 60;
+        Value = Min;
+    }
+    else if (Value > Max)
+    {
+        Value = Max;
     }
 
-    if (new_config.comp_mode > 1)
-    {
-        new_config.comp_mode = 1;
-    }
-
-    if (new_config.vert_wrap > 1)
-    {
-        new_config.vert_wrap = 1;
-    }
-
-    if (new_config.width < 128)
-    {
-        new_config.width = 128;
-    }
-
-    if (new_config.height < 83)
-    {
-        new_config.height = 83;
-    }
-
-    if (new_config.vsync > 1)
-    {
-        new_config.vsync = 1;
-    }
-
-    if (new_config.mute > 1)
-    {
-        new_config.mute = 1;
-    }
-
-    return new_config;
+    return Value;
 }
 
-
-void configSetDefaults()
+static config_t Config_Sanitize(config_t NewConfig)
 {
-    config_t defaults;
+    NewConfig.Frequency = Constrain(NewConfig.Frequency, 60, 65535);
+    NewConfig.CompatibilityMode = Constrain(NewConfig.CompatibilityMode, 0, 1);
+    NewConfig.WindowWidth = Constrain(NewConfig.WindowWidth, 128, 7680);
+    NewConfig.WindowHeight = Constrain(NewConfig.WindowHeight, 83, 4320);
+    NewConfig.EnableVSync = Constrain(NewConfig.EnableVSync, 0, 1);
+    NewConfig.EnableFullscreen = Constrain(NewConfig.EnableFullscreen, 0, 1);
+    NewConfig.EnableGUI = Constrain(NewConfig.EnableGUI, 0, 1);
+    NewConfig.Mute = Constrain(NewConfig.Mute, 0, 1);
 
-    defaults.frequency = 840;
-	defaults.comp_mode = 0;
-	defaults.vert_wrap = 1;
-	defaults.width = 640;
-	defaults.height = 339;
-	defaults.vsync = 0;
-	defaults.mute = 0;
-	defaults.accent.red = 0xFF;
-    defaults.accent.green = 0xFF;
-    defaults.accent.blue = 0xFF;
-	defaults.background.red = 0x00;
-    defaults.background.green = 0x00;
-    defaults.background.blue = 0x00;
-
-    configSet(defaults);
+    return NewConfig;
 }
 
-
-void configSet(config_t new_config)
+void Config_Set(config_t NewConfig)
 {
-    config = sanitizeValues(new_config);
+    Config = Config_Sanitize(NewConfig);
 }
 
-
-config_t configGet()
+void Config_SetDefaults()
 {
-    return config;
+    config_t Default;
+
+    Default.Frequency = 840;
+	Default.CompatibilityMode = 0;
+	Default.WindowWidth = 640;
+	Default.WindowHeight = 339;
+	Default.EnableVSync = 0;
+    Default.EnableFullscreen = 0;
+    Default.EnableGUI = 0;
+	Default.Mute = 0;
+    Default.ColorBackground.R = 0x00;
+    Default.ColorBackground.G = 0x00;
+    Default.ColorBackground.B = 0x00;
+	Default.ColorAccent.R = 0xFF;
+    Default.ColorAccent.G = 0xFF;
+    Default.ColorAccent.B = 0xFF;
+
+    Config_Set(Default);
 }
 
+config_t Config_Get()
+{
+    return Config;
+}
 
-int configLoadFromFile()
+int Config_LoadFromFile()
 {
     FILE* file = fopen("config.ini", "r");
 
 	if (file == NULL)
 	{
+        printf("Error: Cannot open config file.\n");
 		return 1;
 	}
 
-    config_t new_config;
+    config_t LoadedConfig;
 
     fscanf(file,
-        "frequency=%"SCNu16"\n"
-    	"comp_mode=%"SCNu8"\n"
-    	"vert_wrap=%"SCNu8"\n"
-    	"width=%"SCNu16"\n"
-    	"height=%"SCNu16"\n"
-    	"vsync=%"SCNu8"\n"
-    	"mute=%"SCNu8"\n"
-    	"accent.red=%"SCNx8"\n"
-        "accent.green=%"SCNx8"\n"
-        "accent.blue=%"SCNx8"\n"
-    	"background.red=%"SCNx8"\n"
-        "background.green=%"SCNx8"\n"
-        "background.blue=%"SCNx8"\n",
-        &new_config.frequency,
-    	&new_config.comp_mode,
-    	&new_config.vert_wrap,
-    	&new_config.width,
-    	&new_config.height,
-    	&new_config.vsync,
-    	&new_config.mute,
-    	&new_config.accent.red,
-        &new_config.accent.green,
-        &new_config.accent.blue,
-    	&new_config.background.red,
-        &new_config.background.green,
-        &new_config.background.blue);
+        "Frequency=%"SCNu16"\n"
+    	"CompatibilityMode=%"SCNu8"\n"
+    	"WindowWidth=%"SCNu16"\n"
+    	"WindowHeight=%"SCNu16"\n"
+    	"EnableVSync=%"SCNu8"\n"
+        "EnableFullscreen=%"SCNu8"\n"
+        "EnableGUI=%"SCNu8"\n"
+    	"Mute=%"SCNu8"\n"
+    	"ColorBackground.R=%"SCNx8"\n"
+        "ColorBackground.G=%"SCNx8"\n"
+        "ColorBackground.B=%"SCNx8"\n"
+    	"ColorAccent.R=%"SCNx8"\n"
+        "ColorAccent.G=%"SCNx8"\n"
+        "ColorAccent.B=%"SCNx8"\n",
+        &LoadedConfig.Frequency,
+    	&LoadedConfig.CompatibilityMode,
+    	&LoadedConfig.WindowWidth,
+    	&LoadedConfig.WindowHeight,
+    	&LoadedConfig.EnableVSync,
+        &LoadedConfig.EnableFullscreen,
+        &LoadedConfig.EnableGUI,
+    	&LoadedConfig.Mute,
+    	&LoadedConfig.ColorBackground.R,
+        &LoadedConfig.ColorBackground.G,
+        &LoadedConfig.ColorBackground.B,
+    	&LoadedConfig.ColorAccent.R,
+        &LoadedConfig.ColorAccent.G,
+        &LoadedConfig.ColorAccent.B);
 
 	fclose(file);
 
-    configSet(new_config);
+    Config_Set(LoadedConfig);
 
 	return 0;
 }
 
 
-int configSaveToFile()
+int Config_SaveToFile()
 {
     FILE* file = fopen("config.ini", "w");
 
 	if (file == NULL)
 	{
+        printf("Error: Cannot open config file.\n");
 		return 1;
 	}
 
 	fprintf(file,
-        "frequency=%u\n"
-    	"comp_mode=%u\n"
-    	"vert_wrap=%u\n"
-    	"width=%u\n"
-    	"height=%u\n"
-    	"vsync=%u\n"
-    	"mute=%u\n"
-    	"accent.red=%X\n"
-        "accent.green=%X\n"
-        "accent.blue=%X\n"
-    	"background.red=%X\n"
-        "background.green=%X\n"
-        "background.blue=%X\n",
-        config.frequency,
-    	config.comp_mode,
-    	config.vert_wrap,
-    	config.width,
-    	config.height,
-    	config.vsync,
-    	config.mute,
-    	config.accent.red,
-        config.accent.green,
-        config.accent.blue,
-    	config.background.red,
-        config.background.green,
-        config.background.blue);
+        "Frequency=%u\n"
+    	"CompatibilityMode=%u\n"
+    	"WindowWidth=%u\n"
+    	"WindowHeight=%u\n"
+    	"EnableVSync=%u\n"
+        "EnableFullscreen=%u\n"
+        "EnableGUI=%u\n"
+    	"Mute=%u\n"
+    	"ColorBackground.R=%X\n"
+        "ColorBackground.G=%X\n"
+        "ColorBackground.B=%X\n"
+    	"ColorAccent.R=%X\n"
+        "ColorAccent.G=%X\n"
+        "ColorAccent.B=%X\n",
+        Config.Frequency,
+    	Config.CompatibilityMode,
+    	Config.WindowWidth,
+    	Config.WindowHeight,
+    	Config.EnableVSync,
+        Config.EnableFullscreen,
+        Config.EnableGUI,
+    	Config.Mute,
+    	Config.ColorBackground.R,
+        Config.ColorBackground.G,
+        Config.ColorBackground.B,
+    	Config.ColorAccent.R,
+        Config.ColorAccent.G,
+        Config.ColorAccent.B);
 
 	fclose(file);
 

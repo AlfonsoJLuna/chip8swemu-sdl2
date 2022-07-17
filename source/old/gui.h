@@ -25,6 +25,8 @@ void guiRender();
 
 void guiFinalize();
 
+GUI_ToggleEnableGUI()
+
 
 #ifdef __cplusplus
     }

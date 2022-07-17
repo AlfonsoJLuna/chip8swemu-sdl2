@@ -241,7 +241,7 @@ void guiProcessElements(SDL_Window* window)
         ImGui::SetNextWindowSize(ImVec2(450, 230), ImGuiSetCond_Appearing);
         ImGui::SetNextWindowPosCenter(ImGuiSetCond_Appearing);
         ImGui::Begin("About", &show_window_about);
-        ImGui::TextWrapped("chip8swemu v1.1.3\n"
+        ImGui::TextWrapped("chip8swemu v1.2.0\n"
             "by AlfonsoJLuna\n\n"
             "Multiplatform CHIP-8 and Super-CHIP emulator.\n\n"
             "More details: https://github.com/AlfonsoJLuna/chip8swemu\n\n"
@@ -256,7 +256,7 @@ void guiProcessElements(SDL_Window* window)
         ImGui::SetNextWindowSize(ImVec2(450, 115), ImGuiSetCond_Appearing);
         ImGui::SetNextWindowPosCenter(ImGuiSetCond_Appearing);
         ImGui::Begin("Unknown opcode", &show_window_unknownop);
-        ImGui::TextWrapped("An unsupported opcode has been processed.\n\n"
+        ImGui::TextWrapped("An unsupported opcode has been detected.\n\n"
             "Emulation will continue but may not work as expected.\n\n"
             "Please load a rom with CHIP-8/Super-CHIP instructions only.");
         ImGui::End();

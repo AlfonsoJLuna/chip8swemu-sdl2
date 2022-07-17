@@ -2,161 +2,209 @@
 
 #include "chip8.h"
 #include "config.h"
-#include "gui.h"
+#include "icon.h"
+
 #include <SDL.h>
-#include <SDL_opengl.h>
-#include <stdint.h>
 #include <stdio.h>
 
 
-SDL_Window* window = NULL;
-SDL_GLContext glcontext;
+static SDL_Window* Window = NULL;
+static SDL_Renderer* Renderer = NULL;
+static SDL_Texture* Texture = NULL;
 
-// Texture of 64 rows of 128 columns of 3 bytes (R, G, B)
-uint8_t texture[64][128][3] = {0};
-
-bool enable_vsync;
-
-double last_time = 0;
+static double LastTime = 0;
 
 
-bool videoInitialize()
+static void Video_SetIcon()
 {
-    // Init SDL subsystems
+    SDL_Surface* Surface = NULL;
+
+    Surface = SDL_CreateRGBSurfaceFrom(
+        (void*)icon, 96, 96, 32, 96*4,
+        0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000
+    );
+
+    SDL_SetWindowIcon(Window, Surface);
+}
+
+bool Video_Init()
+{
+    config_t Config = Config_Get();
+
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
     {
         printf("Error: %s\n", SDL_GetError());
         return 1;
     }
 
-    // Create a window with an OpenGL context
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    Window = SDL_CreateWindow(
+        "chip8swemu",
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        Config.WindowWidth,
+        Config.WindowHeight,
+        SDL_WINDOW_SHOWN |
+        SDL_WINDOW_RESIZABLE
+    );
 
-    config_t config = configGet();
-
-    window = SDL_CreateWindow("chip8swemu v1.1.3",
-        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        config.width, config.height,
-        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-
-    if (window == NULL)
+    if (Window == NULL)
     {
         printf("Error: %s\n", SDL_GetError());
         return 1;
     }
 
-    glcontext = SDL_GL_CreateContext(window);
+    Video_SetIcon();
 
-    // Disable V-Sync
-    SDL_GL_SetSwapInterval(0);
+    if (Config.EnableFullscreen)
+    {
+        SDL_SetWindowFullscreen(Window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    }
 
-    // Specify the texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 128, 64, 0,
-        GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)texture);
+    if (Config.EnableVSync)
+    {
+        Renderer = SDL_CreateRenderer(
+            Window,
+            -1,
+            SDL_RENDERER_ACCELERATED |
+            SDL_RENDERER_PRESENTVSYNC
+        );
+    }
+    else
+    {
+        Renderer = SDL_CreateRenderer(
+            Window,
+            -1,
+            SDL_RENDERER_ACCELERATED
+        );
+    }
 
-    // Configure the texture
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    if (Renderer == NULL)
+    {
+        printf("Error: %s\n", SDL_GetError());
+        return 1;
+    }
 
-    // Enable textures
-    glEnable(GL_TEXTURE_2D);
+    Texture = SDL_CreateTexture(
+        Renderer,
+        SDL_PIXELFORMAT_RGB888,
+        SDL_TEXTUREACCESS_TARGET,
+        128,
+        64
+    );
 
-    guiInitialize(window);
+    if (Texture == NULL)
+    {
+        printf("Error: %s\n", SDL_GetError());
+        return 1;
+    }
 
     return 0;
 }
 
-
-void videoToggleVsync(bool enable)
+void Video_ToggleFullscreen()
 {
-    SDL_GL_SetSwapInterval(enable);
-    enable_vsync = enable;
+    config_t Config = Config_Get();
+
+    if (Config.EnableFullscreen)
+    {
+        SDL_SetWindowFullscreen(Window, 0);
+        Config.EnableFullscreen = false;
+    }
+    else
+    {
+        SDL_SetWindowFullscreen(Window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+        Config.EnableFullscreen = true;
+    }
+
+    Config_Set(Config);
 }
 
-
-void videoRender()
+static void Video_Wait()
 {
-    config_t config = configGet();
-    int width, height;
-    SDL_GetWindowSize(window, &width, &height);
-    config.width = width;
-    config.height = height;
-    configSet(config);
+    double FramePeriod = 1000.0 / 60.0; // ms
 
-    guiProcessElements(window);
+    double CurrentTime = SDL_GetPerformanceCounter() / SDL_GetPerformanceFrequency();
 
-    // Set viewport
-    glViewport(0, 0,config.width, config.height);
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
+    double BusyTime = (CurrentTime - LastTime) * 1000.0;
 
-    config = configGet();
-
-    // Update texture on memory
-    for (int y = 0; y < 64; y++)
+    if (BusyTime < FramePeriod)
     {
-        for (int x = 0; x < 128; x++)
+        SDL_Delay(FramePeriod - BusyTime);
+    }
+
+    LastTime = SDL_GetPerformanceCounter() / SDL_GetPerformanceFrequency();
+}
+
+void Video_Render()
+{
+    config_t Config = Config_Get();
+
+    // Render the CHIP-8 display into the texture
+    SDL_SetRenderTarget(Renderer, Texture);
+    SDL_SetRenderDrawColor(Renderer, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(Renderer);
+
+    for (int x = 0; x < 128; x++)
+    {
+        for (int y = 0; y < 64; y++)
         {
-            if (chip8GetPixel((63 - y), x))
+            if (chip8GetPixel(y, x))
             {
-                texture[y][x][0] = config.accent.red;
-                texture[y][x][1] = config.accent.green;
-                texture[y][x][2] = config.accent.blue;
+                SDL_SetRenderDrawColor(
+                    Renderer,
+                    Config.ColorAccent.R,
+                    Config.ColorAccent.G,
+                    Config.ColorAccent.B,
+                    SDL_ALPHA_OPAQUE
+                );
             }
             else
             {
-                texture[y][x][0] = config.background.red;
-                texture[y][x][1] = config.background.green;
-                texture[y][x][2] = config.background.blue;
+                SDL_SetRenderDrawColor(
+                    Renderer,
+                    Config.ColorBackground.R,
+                    Config.ColorBackground.G,
+                    Config.ColorBackground.B,
+                    SDL_ALPHA_OPAQUE
+                );
             }
+
+            SDL_RenderDrawPoint(Renderer, x, y);
         }
     }
 
-    // Send texture to GPU
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 128, 64,
-        GL_RGB, GL_UNSIGNED_BYTE, (GLvoid*)texture);
+    // Render the texture into the window
+    SDL_SetRenderTarget(Renderer, NULL);
+    SDL_SetRenderDrawColor(Renderer, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(Renderer);
+    SDL_RenderCopy(Renderer, Texture, NULL, NULL);
+    SDL_RenderPresent(Renderer);
 
-    // Render the texture
-    glBegin(GL_QUADS);
-        glTexCoord2f(0.0f, 0.0f);
-        glVertex2f(-1.0f, -1.0f);
-
-        glTexCoord2f(1.0f, 0.0f);
-        glVertex2f(1.0f, -1.0f);
-
-        glTexCoord2f(1.0f, 1.0f);
-        glVertex2f(1.0f, (float)(config.height - 19 * 2) / config.height);
-
-        glTexCoord2f(0.0f, 1.0f);
-        glVertex2f(-1.0f, (float)(config.height - 19 * 2) / config.height);
-    glEnd();
-
-    guiRender();
-
-    double current_time = SDL_GetPerformanceCounter() / SDL_GetPerformanceFrequency();
-    double busy_time = current_time - last_time;
-    if (!enable_vsync && ((busy_time * 1000) < (1000 / 60)))
-        SDL_Delay(1000 / 60 - busy_time * 1000);
-    last_time = SDL_GetPerformanceCounter() / SDL_GetPerformanceFrequency();
-
-    SDL_GL_SwapWindow(window);
+    // Limit the framerate if VSync is disabled
+    if (Config.EnableVSync == false)
+    {
+        Video_Wait();
+    }
 }
 
-
-void videoFinalize()
+void Video_Quit()
 {
-    guiFinalize();
-
-    SDL_GL_DeleteContext(glcontext);
-
-    if (window != NULL)
+    if (Texture != NULL)
     {
-        SDL_DestroyWindow(window);
-        window = NULL;
+        SDL_DestroyTexture(Texture);
+        Texture = NULL;
+    }
+
+    if (Renderer != NULL)
+    {
+        SDL_DestroyRenderer(Renderer);
+        Renderer = NULL;
+    }
+
+    if (Window != NULL)
+    {
+        SDL_DestroyWindow(Window);
+        Window = NULL;
     }
 
     SDL_Quit();

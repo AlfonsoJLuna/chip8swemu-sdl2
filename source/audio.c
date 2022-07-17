@@ -5,20 +5,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 #define PI 3.14159265358979323846
+
 
 SDL_AudioSpec* audiospec = NULL;
 SDL_AudioDeviceID device = 0;
 
-double wave_position = 0;
-double wave_increment = 2 * PI * 1000 / 44100;
+static double wave_position = 0;
+static double wave_increment = 2 * PI * 1000 / 44100;
 
-bool mute_sound;
+static bool mute_sound;
 
 
 // Samples can vary between -127 and 128
 // Sine wave varies between -50 and 50
-void sineWave(void* userdata, Uint8* stream, int lenght)
+static void sineWave(void* userdata, Uint8* stream, int lenght)
 {
     for (int i = 0; i < lenght; i++)
     {
@@ -28,7 +30,7 @@ void sineWave(void* userdata, Uint8* stream, int lenght)
 }
 
 
-bool audioInitialize()
+bool Audio_Init()
 {
     audiospec = (SDL_AudioSpec*)malloc(sizeof(SDL_AudioSpec));
     audiospec->freq = 44100;
@@ -44,23 +46,24 @@ bool audioInitialize()
         printf("Error: Failed to initialize audio device: %s\n", SDL_GetError());
         return 1;
     }
+    
     return 0;
 }
 
 
-void audioMute(bool mute)
+void Audio_Mute(bool mute)
 {
     mute_sound = mute;
 }
 
 
-void audioUpdate(bool beep)
+void Audio_Update(bool beep)
 {
     SDL_PauseAudioDevice(device, !beep || mute_sound);
 }
 
 
-void audioFinalize()
+void Audio_Quit()
 {
     if (device != 0)
     {

@@ -5,7 +5,11 @@ C_FILES += $(wildcard source/*.c) \
 
 CPP_FILES += $(wildcard source/*.cpp) \
 	libraries/imgui/imgui.cpp \
-	libraries/imgui/imgui_draw.cpp
+	libraries/imgui/imgui_draw.cpp \
+	libraries/imgui/imgui_tables.cpp \
+	libraries/imgui/imgui_widgets.cpp \
+	libraries/imgui/backends/imgui_impl_sdl.cpp \
+	libraries/imgui/backends/imgui_impl_sdlrenderer.cpp
 
 C_OBJECTS += $(addprefix objects/,$(notdir $(C_FILES:.c=.o)))
 
@@ -16,7 +20,8 @@ CPP_OBJECTS += $(addprefix objects/,$(notdir $(CPP_FILES:.cpp=.o)))
 HEADERS += -Isource \
 	-Ilibraries/chip8swemu/source \
 	-Ilibraries/chip8swemu/assets/default_rom \
-	-Ilibraries/imgui
+	-Ilibraries/imgui \
+	-Ilibraries/imgui/backends
 
 CFLAGS += -Wall -Wextra -MMD -O2
 
@@ -105,10 +110,13 @@ objects/%.o: source/%.cpp
 	g++ $(CFLAGS) $(HEADERS) -c $< -o $@
 
 objects/%.o: libraries/chip8swemu/source/%.c
-	gcc -std=c99 $(CFLAGS) -c $< -o $@
+	gcc -std=c99 $(CFLAGS) $(HEADERS) -c $< -o $@
 
 objects/%.o: libraries/imgui/%.cpp
-	g++ $(CFLAGS) -c $< -o $@
+	g++ $(CFLAGS) $(HEADERS) -c $< -o $@
+
+objects/%.o: libraries/imgui/backends/%.cpp
+	g++ $(CFLAGS) $(HEADERS) -c $< -o $@
 
 -include $(C_OBJECTS:.o=.d)
 -include $(CPP_OBJECTS:.o=.d)

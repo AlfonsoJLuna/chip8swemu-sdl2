@@ -7,36 +7,35 @@
 
 typedef struct
 {
-	uint8_t red;
-	uint8_t green;
-	uint8_t blue;
+    uint8_t R;
+    uint8_t G;
+    uint8_t B;
 } color_t;
-
 
 typedef struct
 {
-	uint16_t frequency;
-	uint8_t comp_mode;
-	uint8_t vert_wrap;
-	uint16_t width;
-	uint16_t height;
-	uint8_t vsync;
-	uint8_t mute;
-	color_t accent;
-	color_t background;
+    uint16_t    Frequency;
+    uint8_t     CompatibilityMode;
+    uint16_t    WindowWidth;
+    uint16_t    WindowHeight;
+    uint8_t     EnableVSync;
+    uint8_t     EnableFullscreen;
+    uint8_t     EnableGUI;
+    uint8_t     Mute;
+    color_t     ColorBackground;
+    color_t     ColorAccent;
 } config_t;
 
 
-void configSetDefaults();
+void        Config_SetDefaults();
 
-void configSet(config_t new_config);
+void        Config_Set(config_t NewConfig);
 
-config_t configGet();
+config_t    Config_Get();
+
+int         Config_LoadFromFile();
+
+int         Config_SaveToFile();
 
 
-int configLoadFromFile();
-
-int configSaveToFile();
-
-
-#endif
+#endif  // CONFIG_H

@@ -5,33 +5,13 @@
 #include <stdbool.h>
 
 
-/**
- * Initialize SDL and create a window with an OpenGL context.
- *
- * @return 0 if the window was created succesfully, 1 otherwise.
-*/
-bool videoInitialize();
+bool Video_Init();
 
+void Video_ToggleFullscreen();
 
-/**
- * Enable Vertical Sync
- *
- * @param enable
- *
- */
-void videoToggleVsync(bool enable);
+void Video_Render();
 
-
-/**
- * Draw the CHIP-8 screen and the GUI to the window.
-*/
-void videoRender();
-
-
-/**
- * Destroy SDL context.
-*/
-void videoFinalize();
+void Video_Quit();
 
 
 #endif  // VIDEO_H

@@ -5,13 +5,13 @@
 #include <stdbool.h>
 
 
-bool audioInitialize();
+bool Audio_Init();
 
-void audioMute(bool mute);
+void Audio_Mute(bool mute);
 
-void audioUpdate(bool beep);
+void Audio_Update(bool beep);
 
-void audioFinalize();
+void Audio_Quit();
 
 
 #endif  // AUDIO_H

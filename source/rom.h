@@ -2,11 +2,11 @@
 #define ROM_H
 
 
-int romLoadDefault();
+int ROM_LoadDefault();
 
-int romLoadFromPath(char* rom_path);
+int ROM_LoadFromPath(char* rom_path);
 
-int romLoadFromDialog();
+int ROM_LoadFromDialog();
 
 
-#endif
+#endif  // ROM_H
