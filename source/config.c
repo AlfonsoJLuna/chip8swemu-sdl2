@@ -26,10 +26,11 @@ static config_t Config_Sanitize(config_t NewConfig)
     NewConfig.Frequency = Constrain(NewConfig.Frequency, 60, 65535);
     NewConfig.CompatibilityMode = Constrain(NewConfig.CompatibilityMode, 0, 1);
     NewConfig.WindowWidth = Constrain(NewConfig.WindowWidth, 128, 7680);
-    NewConfig.WindowHeight = Constrain(NewConfig.WindowHeight, 83, 4320);
+    NewConfig.WindowHeight = Constrain(NewConfig.WindowHeight, 90, 4320);
     NewConfig.EnableVSync = Constrain(NewConfig.EnableVSync, 0, 1);
     NewConfig.EnableFullscreen = Constrain(NewConfig.EnableFullscreen, 0, 1);
     NewConfig.EnableGUI = Constrain(NewConfig.EnableGUI, 0, 1);
+    NewConfig.Stretch = Constrain(NewConfig.Stretch, 0, 1);
     NewConfig.Mute = Constrain(NewConfig.Mute, 0, 1);
 
     return NewConfig;
@@ -46,11 +47,12 @@ void Config_SetDefaults()
 
     Default.Frequency = 840;
 	Default.CompatibilityMode = 0;
-	Default.WindowWidth = 640;
-	Default.WindowHeight = 339;
+	Default.WindowWidth = 6 * 128;
+	Default.WindowHeight = 6 * 64;
 	Default.EnableVSync = 0;
     Default.EnableFullscreen = 0;
-    Default.EnableGUI = 0;
+    Default.EnableGUI = 1;
+    Default.Stretch = 0;
 	Default.Mute = 0;
     Default.ColorBackground.R = 0x00;
     Default.ColorBackground.G = 0x00;
@@ -87,6 +89,7 @@ int Config_LoadFromFile()
     	"EnableVSync=%"SCNu8"\n"
         "EnableFullscreen=%"SCNu8"\n"
         "EnableGUI=%"SCNu8"\n"
+        "Stretch=%"SCNu8"\n"
     	"Mute=%"SCNu8"\n"
     	"ColorBackground.R=%"SCNx8"\n"
         "ColorBackground.G=%"SCNx8"\n"
@@ -101,6 +104,7 @@ int Config_LoadFromFile()
     	&LoadedConfig.EnableVSync,
         &LoadedConfig.EnableFullscreen,
         &LoadedConfig.EnableGUI,
+        &LoadedConfig.Stretch,
     	&LoadedConfig.Mute,
     	&LoadedConfig.ColorBackground.R,
         &LoadedConfig.ColorBackground.G,
@@ -135,6 +139,7 @@ int Config_SaveToFile()
     	"EnableVSync=%u\n"
         "EnableFullscreen=%u\n"
         "EnableGUI=%u\n"
+        "Stretch=%u\n"
     	"Mute=%u\n"
     	"ColorBackground.R=%X\n"
         "ColorBackground.G=%X\n"
@@ -149,6 +154,7 @@ int Config_SaveToFile()
     	Config.EnableVSync,
         Config.EnableFullscreen,
         Config.EnableGUI,
+        Config.Stretch,
     	Config.Mute,
     	Config.ColorBackground.R,
         Config.ColorBackground.G,

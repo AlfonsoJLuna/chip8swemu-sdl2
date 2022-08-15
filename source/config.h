@@ -21,6 +21,7 @@ typedef struct
     uint8_t     EnableVSync;
     uint8_t     EnableFullscreen;
     uint8_t     EnableGUI;
+    uint8_t     Stretch;
     uint8_t     Mute;
     color_t     ColorBackground;
     color_t     ColorAccent;

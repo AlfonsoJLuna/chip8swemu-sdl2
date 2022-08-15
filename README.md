@@ -3,25 +3,27 @@
 
 *Multiplatform CHIP-8 and Super-CHIP emulator.*
 
-![](assets/SDL2-1.png) | ![](assets/SDL2-2.png) | ![](assets/SDL2-3.png)
-:------------------------: | :------------------------: | :------------------------:
-
-Compiled releases are available here: https://github.com/AlfonsoJLuna/chip8swemu-sdl2/releases
+![](assets/sdl2-1.png) | ![](assets/sdl2-2.png)
+:--------------------: | :--------------------:
+![](assets/sdl2-3.png) | ![](assets/sdl2-4.png)
 
 ## Features
 
-chip8swemu-sdl2 is a port of [chip8swemu](https://github.com/AlfonsoJLuna/chip8swemu) for the desktop based on [SDL2](http://libsdl.org) and [Dear ImGui](https://github.com/ocornut/imgui). Features include:
+chip8swemu-sdl2 is a port of [chip8swemu](https://github.com/AlfonsoJLuna/chip8swemu) for the desktop based on [SDL2](http://libsdl.org) and [Dear ImGui](https://github.com/ocornut/imgui). 
 
-* Compatible with Windows and Linux.
+* Frontend compatible with Windows and Linux.
 * Configurable CPU clock rate, 840Hz by default.
 * Configurable color palette, black and white by default.
 * Compatibility modes for games that require special settings.
 * ROM files can be passed as an argument or dropped to the window.
 * Native file selection dialog (only available on Windows).
 
-## Building
+## Releases
 
-Required dependencies are ImGui, SDL2, OpenGL.
+* Windows: [chip8swemu-v1.2.0-win64.zip]()
+* Linux: [chip8swemu-v1.2.0-linux64.tar.gz]()
+
+## Building
 
 ### How to build on Linux (Ubuntu)
 

@@ -1,5 +1,6 @@
 build/*
 !build/.gitkeep
+!build/fonts/Roboto-Medium.ttf
 
 libraries/SDL*
 

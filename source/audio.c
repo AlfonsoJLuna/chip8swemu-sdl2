@@ -1,5 +1,7 @@
 #include "audio.h"
 
+#include "config.h"
+
 #include <SDL.h>
 #include <math.h>
 #include <stdio.h>
@@ -15,8 +17,6 @@ SDL_AudioDeviceID device = 0;
 static double wave_position = 0;
 static double wave_increment = 2 * PI * 1000 / 44100;
 
-static bool mute_sound;
-
 
 // Samples can vary between -127 and 128
 // Sine wave varies between -50 and 50
@@ -28,7 +28,6 @@ static void sineWave(void* userdata, Uint8* stream, int lenght)
         wave_position += wave_increment;
     }
 }
-
 
 bool Audio_Init()
 {
@@ -50,21 +49,17 @@ bool Audio_Init()
     return 0;
 }
 
-
-void Audio_Mute(bool mute)
-{
-    mute_sound = mute;
-}
-
-
 void Audio_Update(bool beep)
 {
-    SDL_PauseAudioDevice(device, !beep || mute_sound);
-}
+    config_t Config = Config_Get();
 
+    SDL_PauseAudioDevice(device, !beep || Config.Mute);
+}
 
 void Audio_Quit()
 {
+    SDL_PauseAudioDevice(device, true);
+
     if (device != 0)
     {
         SDL_CloseAudioDevice(device);

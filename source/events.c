@@ -1,7 +1,8 @@
 #include "events.h"
 
 #include "chip8.h"
-// #include "gui.h"
+#include "config.h"
+#include "gui.h"
 #include "rom.h"
 #include "video.h"
 
@@ -13,13 +14,16 @@ SDL_Event events;
 
 bool Events_Process()
 {
+    config_t Config = Config_Get();
+
     bool flag_quit = false;
+    bool flag_reset = false;
     bool flag_toggle_fullscreen = false;
     bool flag_toggle_gui = false;
 
     while (SDL_PollEvent(&events))
     {
-        // GUI_ProcessInput(&events);
+        GUI_ProcessEvents(&events);
 
         switch (events.type)
         {
@@ -36,6 +40,7 @@ bool Events_Process()
                 switch (events.key.keysym.scancode)
                 {
                     case SDL_SCANCODE_ESCAPE:   flag_quit = true;               break;
+                    case SDL_SCANCODE_F1:       flag_reset = true;              break;
                     case SDL_SCANCODE_F11:      flag_toggle_fullscreen = true;  break;
                     case SDL_SCANCODE_F12:      flag_toggle_gui = true;         break;
                     case SDL_SCANCODE_X:        chip8UpdateKey(0x0, true);      break;
@@ -86,15 +91,31 @@ bool Events_Process()
         }
     }
 
+    if (flag_reset)
+    {
+        chip8ResetCpu();
+    }
+
     if (flag_toggle_fullscreen)
     {
-        Video_ToggleFullscreen();
+        if (Config.EnableFullscreen)
+        {
+            Config.EnableFullscreen = false;
+            Video_EnableFullscreen(false);
+        }
+        else
+        {
+            Config.EnableFullscreen = true;
+            Video_EnableFullscreen(true);
+        }
     }
 
     if (flag_toggle_gui)
     {
-        // GUI_ToggleEnableGUI();
+        Config.EnableGUI = !Config.EnableGUI;
     }
+
+    Config_Set(Config);
 
     return flag_quit;
 }

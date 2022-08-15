@@ -7,8 +7,6 @@
 
 bool Audio_Init();
 
-void Audio_Mute(bool mute);
-
 void Audio_Update(bool beep);
 
 void Audio_Quit();

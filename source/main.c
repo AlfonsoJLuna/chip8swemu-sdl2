@@ -2,7 +2,7 @@
 #include "chip8.h"
 #include "config.h"
 #include "events.h"
-// #include "gui.h"
+#include "gui.h"
 #include "rom.h"
 #include "video.h"
 
@@ -43,13 +43,16 @@ int main(int argc, char* argv[])
     while (!Quit)
     {
         Quit |= Events_Process();
-        // Quit |= GUI_GetFlagQuit();
+        Quit |= GUI_GetFlagQuit();
 
         config_t Config = Config_Get();
 
+        chip8CompatibilityMode(Config.CompatibilityMode);
+        chip8VerticalWrap(Config.CompatibilityMode);
+
         if (chip8StepCpu(Config.Frequency / 60))
         {
-            // GUI_ShowUnknownOp();
+            GUI_ShowUnknownOp();
         }
 
         Audio_Update(chip8GetAudio());
