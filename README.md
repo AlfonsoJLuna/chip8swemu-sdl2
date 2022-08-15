@@ -20,8 +20,8 @@ chip8swemu-sdl2 is a port of [chip8swemu](https://github.com/AlfonsoJLuna/chip8s
 
 ## Releases
 
-* Windows: [chip8swemu-v1.2.0-win64.zip]()
-* Linux: [chip8swemu-v1.2.0-linux64.tar.gz]()
+* Windows: [chip8swemu-v1.2.0-win64.zip](https://github.com/AlfonsoJLuna/chip8swemu-sdl2/releases/download/v1.2.0/chip8swemu-v1.2.0-win64.zip)
+* Linux: [chip8swemu-v1.2.0-linux64.tar.gz](https://github.com/AlfonsoJLuna/chip8swemu-sdl2/releases/download/v1.2.0/chip8swemu-v1.2.0-linux64.tar.gz)
 
 ## Building
 
